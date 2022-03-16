@@ -16,65 +16,13 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Textures
+ * Test cube
  */
-const textureLoader = new THREE.TextureLoader()
-
-/**
- * Particles
- */
-const particlesGeometry = new THREE.BufferGeometry()
-
-
-const count = 10000
-const positions = new Float32Array(count * 3)
-const colors = new Float32Array(count * 3)
-
-for (let i = 0; i < count * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 10;
-    colors[i] = Math.random();
-}
-particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-
-
-const particlesMaterial = new THREE.PointsMaterial({ size: 0.1, sizeAttenuation: true });
-const points = new THREE.Points(particlesGeometry, particlesMaterial)
-scene.add(points)
-
-
-
-/* Textures
-*
-*/
-
-
-//const particleTexture = textureLoader.load('textures/particles/1.png')
-const particleTexture = textureLoader.load('textures/particles/2.png')
-//const particleTexture = textureLoader.load('textures/particles/3.png')
-// const particleTexture = textureLoader.load('textures/particles/4.png')
-//const particleTexture = textureLoader.load('textures/particles/5.png')
-// const particleTexture = textureLoader.load('textures/particles/6.png')
-// const particleTexture = textureLoader.load('textures/particles/7.png')
-//const particleTexture = textureLoader.load('textures/particles/8.png')
-//const particleTexture = textureLoader.load('textures/particles/9.png')
-// const particleTexture = textureLoader.load('textures/particles/10.png')
-
-particlesMaterial.transparent = true
-particlesMaterial.alphaMap = particleTexture
-// particlesMaterial.alphaTest = 0.01;
-// particlesMaterial.depthTest = false;
-particlesMaterial.depthWrite = false;
-particlesMaterial.blending = THREE.AdditiveBlending;
-particlesMaterial.vertexColors = true;
-
-
-
-// const cube = new THREE.Mesh(
-//     new THREE.BoxGeometry(1, 1, 1),
-//     new THREE.MeshBasicMaterial({ })
-// )
-// scene.add(cube)
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial()
+)
+scene.add(cube)
 
 /**
  * Sizes
@@ -84,7 +32,8 @@ const sizes = {
     height: window.innerHeight
 }
 
-window.addEventListener('resize', () => {
+window.addEventListener('resize', () =>
+{
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -96,7 +45,6 @@ window.addEventListener('resize', () => {
     // Update renderer
     renderer.setSize(sizes.width, sizes.height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setClearColor('#080914')
 })
 
 /**
@@ -104,6 +52,8 @@ window.addEventListener('resize', () => {
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
+camera.position.x = 3
+camera.position.y = 3
 camera.position.z = 3
 scene.add(camera)
 
@@ -125,18 +75,10 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () => {
+const tick = () =>
+{
     const elapsedTime = clock.getElapsedTime()
 
-    // points.rotation.y = elapsedTime * 0.2;
-    for (let i = 0; i < count; i++) {
-        const i3 = i * 3;
-        const x = particlesGeometry.attributes.position.array[i3+0];
-        const y = particlesGeometry.attributes.position.array[i3+2];
-        particlesGeometry.attributes.position.array[i3 + 1] = Math.sin(elapsedTime+x)*0.5 + Math.sin(elapsedTime+y)*0.5;
-    }
-
-    particlesGeometry.attributes.position.needsUpdate = true;
     // Update controls
     controls.update()
 
@@ -148,15 +90,3 @@ const tick = () => {
 }
 
 tick()
-
-
-console.log("UUID", THREE.MathUtils.generateUUID())
-
-console.log("lerp", THREE.MathUtils.lerp(1, 2, 0.5))
-
-
-console.log("ceilPowerOfTwo", THREE.MathUtils.ceilPowerOfTwo(9))
-console.log("floorPowerOfTwo", THREE.MathUtils.floorPowerOfTwo(9))
-console.log("randFloat", THREE.MathUtils.randFloat(10, 100))
-console.log("randInt", THREE.MathUtils.randInt(10, 100))
-console.log("seededRandom", THREE.MathUtils.seededRandom(5))
