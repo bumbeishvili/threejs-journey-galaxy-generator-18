@@ -16,13 +16,93 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 /**
- * Test cube
+ * Galaxy
  */
-const cube = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial()
-)
-scene.add(cube)
+const params = {
+    count: 300000,
+    size: 0.01,
+    radius: 10,
+    branches: 3,
+    spin: 1,
+    randomness: 1,
+    randomnessPower: 1,
+    insideColor: '#ff6030',
+    outsideColor: '#1b3984',
+};
+
+let geometry = null;
+let material = null;
+let points = null;
+
+
+const generateGalaxy = () => {
+
+    if (points) {
+        scene.remove(points)
+        material.dispose()
+        geometry.dispose();
+    }
+
+
+
+    geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(params.count * 3);
+    const colors = new Float32Array(params.count * 3);
+
+    const colorInside = new THREE.Color(params.insideColor);
+    const colorOutside = new THREE.Color(params.outsideColor);
+
+    for (let i = 0; i < params.count; i++) {
+        const i3 = i * 3;
+
+        const r = Math.random() * params.radius;
+
+      
+        const mixedColor = colorInside.clone()
+        mixedColor.lerp(colorOutside, r / params.radius)
+        colors[i3] = mixedColor.r;
+        colors[i3 + 1] = mixedColor.g;
+        colors[i3 + 2] = mixedColor.b;
+
+        const branchIndex = i % params.branches
+        const branchAngle = branchIndex / params.branches;
+        const rotation = branchAngle * Math.PI * 2;
+        const spinAngle = r * params.spin;
+
+
+        const randomX = Math.pow(Math.random(), params.randomnessPower) * (Math.random() - 0.5) * params.randomness * r
+        const randomY = Math.pow(Math.random(), params.randomnessPower) * (Math.random() - 0.5) * params.randomness * r
+        const randomZ = Math.pow(Math.random(), params.randomnessPower) * (Math.random() - 0.5) * params.randomness * r
+
+     
+        positions[i3] = Math.cos(rotation + spinAngle) * r + randomX;
+        positions[i3 + 1] = randomY
+        positions[i3 + 2] = Math.sin(rotation + spinAngle) * r + randomZ;
+
+
+    }
+
+    // Branches
+
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+
+    material = new THREE.PointsMaterial({
+        color: '#6359ee',
+        size: params.size,
+        sizeAttenuation: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        vertexColors: true,
+    })
+    points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    console.log('generateGalaxy')
+}
+generateGalaxy();
 
 /**
  * Sizes
@@ -32,8 +112,7 @@ const sizes = {
     height: window.innerHeight
 }
 
-window.addEventListener('resize', () =>
-{
+window.addEventListener('resize', () => {
     // Update sizes
     sizes.width = window.innerWidth
     sizes.height = window.innerHeight
@@ -60,6 +139,7 @@ scene.add(camera)
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
+controls.autoRotate = true
 
 /**
  * Renderer
@@ -75,8 +155,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  */
 const clock = new THREE.Clock()
 
-const tick = () =>
-{
+const tick = () => {
     const elapsedTime = clock.getElapsedTime()
 
     // Update controls
@@ -90,3 +169,32 @@ const tick = () =>
 }
 
 tick()
+
+
+// GUI
+gui.add(params, 'count', 0, 500000, 100)
+    .onFinishChange(generateGalaxy)
+
+gui.add(params, 'size', 0, 1, 0.01)
+    .onFinishChange(generateGalaxy)
+
+gui.add(params, 'radius', 0, 10, 0.01)
+    .onFinishChange(generateGalaxy)
+
+gui.add(params, 'branches', 2, 20, 1)
+    .onFinishChange(generateGalaxy)
+
+gui.add(params, 'spin', -5, 5, 0.01)
+    .onFinishChange(generateGalaxy)
+
+gui.add(params, 'randomness', 0, 4, 0.01)
+    .onFinishChange(generateGalaxy)
+
+gui.add(params, 'randomnessPower', 0.01, 3, 0.01)
+    .onFinishChange(generateGalaxy)
+
+gui.addColor(params, 'insideColor')
+    .onFinishChange(generateGalaxy)
+
+gui.addColor(params, 'outsideColor')
+    .onFinishChange(generateGalaxy)    
